@@ -1,0 +1,13 @@
+#include<lpc21xx.h>
+void uart0_init(void){//The uart0 is used to receive commands from mobile using bluetooth
+	PINSEL0=0x05;
+	U0LCR=0x83;
+	U0DLL=97;
+	U0LCR=0x03;
+}
+void uart1_init(void){//The uart1 is used to send commands to slaves using zigbee module
+	PINSEL0|=0x50000;
+	U1LCR=0x83;
+	U1DLL=97;
+	U1LCR=0x03;
+}
