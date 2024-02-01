@@ -1,0 +1,11 @@
+Components used in this project are:
+hardware:
+ARM7 microcontroller (lpc2148)
+dc motors
+bluetooth
+l293D drivers
+zigbee modules
+DC power supply 
+software:
+proteus
+keil
