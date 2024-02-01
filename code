@@ -1,0 +1,97 @@
+void command(char cmd){
+	command(0x01); // Clear the diaplay
+	IOCLR2=1<<24;
+	IOCLR2=1<<25;
+	IOCLR2=1<<26;
+	IOPIN2=cmd<<16;//send command
+	IOSET2=1<<24;
+}
+void senddata(char data){
+	IOCLR2=1<<24;
+	IOCLR2=1<<25;
+	IOSET2=1<<26;
+	IOPIN2=data<<16;//Send data
+	IOSET2=1<<24;
+}
+void lcd_init(void){
+	PINSEL2=0x00;
+	IODIR2|= 0x7FF0000;//Set the data direction of pins for 16 to 28 as output pins
+	command(0x38); //2 line, 8 bit data
+	command(0x0F); //display ON, Cursor Blinking
+	command(0x18); //Shift entire display left
+	command(0x80); //Display on first line
+}
+void display(char *s){
+		while(*s){
+			senddata(*s);
+			s++;
+		}
+}
+int main(){
+	int x;
+	uart0_init();//
+	uart1_init();
+	lcd_init();
+	IODIR0=0xFF00;
+	while(1){
+		while(!(U0LSR&0x01));
+		x=U0RBR;
+		switch(x){
+			case 'F':
+			case 'f':
+				U1THR='F';//Send Farward command too slave using Zigbee module.
+			  while(!(U1LSR&0x20));//Wait until command is transmitted
+				IOSET0=0x5000;//Run the device in farward direction
+				IOCLR0=0xA000;
+			  command(0x01); // Clear the diaplay
+			  display("Farward Direction");
+			  break;	
+			case 'B':
+			case 'b':
+				U1THR='B';//Send Reverse command too slave using Zigbee module.
+			  while(!(U1LSR&0x20));//Wait until command is transmitted
+				IOSET0=0xA000;
+				IOCLR0=0x5000;
+			  command(0x01); // Clear the diaplay
+			  display("Backward Direction");
+			  break;	
+			case 'S':
+			case 's':
+				U1THR='S';//Send Stop command too slave using Zigbee module.
+			  while(!(U1LSR&0x20));//Wait until command is transmitted
+				IOCLR0=0xF000;
+			  command(0x01); // Clear the diaplay
+			  display("Stop");
+			  
+			  break;	
+			case 'R':
+			case 'r':
+				U1THR='R';//Send Right turn command too slave using Zigbee module.
+			  while(!(U1LSR&0x20));//Wait until command is transmitted
+				IOSET0=0x1000;
+			  IOCLR0=0xE000;
+			  command(0x01); // Clear the diaplay
+			  display("Right Turn");
+			  break;	
+			case 'L':
+			case 'l':
+				U1THR='L';//Send Left turn too slave using Zigbee module.
+			  while(!(U1LSR&0x20));//Wait until command is transmitted
+				IOSET0=0x4000;
+			  IOCLR0=0xB000;
+			  command(0x01); // Clear the diaplay
+			  display("Left Turn");
+			  break;	
+			case 'P':
+			case 'p':
+				U1THR='P';//Send Ploughing too slave using Zigbee module.
+			  while(!(U1LSR&0x20));//Wait until command is transmitted
+				IOSET0=0xC000;//Start Ploughing using stepper motor
+			  IOCLR0=0x4000;
+			  command(0x01); // Clear the diaplay
+			  display("Ploughing ON");
+			  break;	
+			
+		}
+	}
+}
